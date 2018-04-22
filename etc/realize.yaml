@@ -1,0 +1,50 @@
+settings:
+  resources:
+    outputs: ./log/outputs.log
+    logs: ./log/logs.log
+    errors: ./log/errors.log
+  legacy:
+    force: false
+    interval: 100ms
+server:
+  status: false
+  open: false
+  host: localhost
+  port: 5000
+schema:
+- name: go-workshop
+  path: %PROJECT_ROOT%
+  commands:
+    vet:
+      status: true
+    test:
+      status: true
+    build:
+      status: true
+      method: go build -o bin/go-workshop ./cmd/go-workshop
+    install:
+      status: true
+      method: go install ./cmd/go-workshop
+    run:
+      status: true
+  watcher:
+    paths:
+    - /
+    extensions:
+    - go
+    ignored_paths:
+    - .git
+    - .realize
+    - db
+    - bin
+    - etc
+    - support
+    - vendor
+    - .idea
+    - raml
+    - log
+    scripts:
+      - type: before
+        command: if [ ! -d "./log" ]; then mkdir -p ./log; fi
+        global: true
+        output: false
