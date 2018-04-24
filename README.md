@@ -2,7 +2,7 @@
 Før workshop bør du installere Go og sjekke at du får kompilert og kjørt et testprogram.
 
 ### Sette opp prosjekt
-Installer Go
+Installer Go med `brew` eller sjekk guiden [her](https://golang.org/doc/install#install)
 ```
 brew install go
 ```
