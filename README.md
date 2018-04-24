@@ -6,7 +6,7 @@ Installer Go
 ```
 brew install go
 ```
-_Legg til støtte for Go i editoren din også!_
+_Legg til støtte for Go i editoren din også! Vi anbefaler å bruke Intellij eller Visual Studio_
 
 Legg til prosjektet (det er **sterkt** anbefalt å legge mappen akkurat her, vi kommer til å snakke mer om det under selve fagkvelden)
 ```
