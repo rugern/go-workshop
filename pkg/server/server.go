@@ -2,16 +2,15 @@ package server
 
 import (
 	"github.com/gorilla/mux"
-	"net/http"
-	"fmt"
+	"github.com/rugern/go-workshop/pkg/database"
 )
 
-func MakeRouter() *mux.Router {
+func MakeRouter(todoDB database.TodoDB) *mux.Router {
 	router := mux.NewRouter()
-	router.HandleFunc("/hello", helloWorld).Methods("GET")
+	todoController := NewTodoController(todoDB)
+	router.HandleFunc("/todo/{id:[0-9]+}", todoController.GetTodo).Methods("GET")
+	router.HandleFunc("/todo/", todoController.GetTodos).Methods("GET")
+	router.HandleFunc("/todo/", todoController.AddTodo).Methods("POST")
+	router.HandleFunc("/todo/{id:[0-9]+}", todoController.UpdateTodo).Methods("PATCH")
 	return router
-}
-
-func helloWorld(w http.ResponseWriter, _ *http.Request) {
-	fmt.Fprint(w, "Hello world!")
 }
