@@ -38,6 +38,8 @@ Installer avhengigheter
 dep ensure
 ```
 
+I den siste oppgaven skal vi bruke en MySQL-database for persistering. Vi har lagt ved en docker-compose.yml som ordner dette for deg (kjør `docker-compose up -d`), men det krever at du har Docker installert.
+
 ### Kjør testprosjekt
 Kompiler kode og kjør binærfil
 ```
