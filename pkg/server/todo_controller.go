@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"github.com/gorilla/mux"
 	"fmt"
+	"github.com/rugern/go-workshop/pkg/model"
 )
 
 type addTodoRequest struct {
@@ -24,52 +25,25 @@ type TodoController struct {
 func (t TodoController) GetTodo(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
-		panic(err)
+		encodeResponse(w, model.Todo{}, model.CustomError{
+			Message: fmt.Sprintf("Invalid parameter, reason: %s", err.Error()),
+			StatusCode: http.StatusBadRequest,
+		})
 	}
 
 	todo, err := t.todoDB.SelectTodo(id)
 	encodeResponse(w, todo, err)
 }
 
-func (t TodoController) GetTodos(w http.ResponseWriter, _ *http.Request) {
-	todos, err := t.todoDB.SelectTodos()
-	encodeResponse(w, todos, err)
-}
-
-func (t TodoController) AddTodo(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	defer r.Body.Close()
-	var body addTodoRequest
-	err := decoder.Decode(&body)
-	if err != nil {
-		panic(err)
-	}
-
-	todo := t.todoDB.InsertTodo(body.Description)
-	encodeResponse(w, todo, nil)
-}
-
-func (t TodoController) UpdateTodo(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(mux.Vars(r)["id"])
-	if err != nil {
-		panic(err)
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	defer r.Body.Close()
-	var body patchTodoRequest
-	err = decoder.Decode(&body)
-	if err != nil {
-		panic(err)
-	}
-
-	todo, err := t.todoDB.PatchTodo(id, body.Checked)
-	encodeResponse(w, todo, err)
-}
-
 func encodeResponse(w http.ResponseWriter, body interface{}, err error) {
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		switch err.(type) {
+		case model.CustomError:
+			customError := err.(model.CustomError)
+			w.WriteHeader(customError.Status())
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		fmt.Fprint(w, err.Error())
 		return
 	}
@@ -78,6 +52,6 @@ func encodeResponse(w http.ResponseWriter, body interface{}, err error) {
 	json.NewEncoder(w).Encode(body)
 }
 
-func NewTodoController() TodoController {
-	return TodoController{todoDB: database.NewTodoDB()}
+func NewTodoController(todoDB database.TodoDB) TodoController {
+	return TodoController{todoDB: todoDB}
 }

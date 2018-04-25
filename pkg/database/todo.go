@@ -1,44 +1,47 @@
 package database
 
 import (
+	"database/sql"
+	"log"
 	"github.com/rugern/go-workshop/pkg/model"
-	"errors"
+	"net/http"
 )
 
 type TodoDB struct {
-	todos map[int]model.Todo
+	db                  *sql.DB
+	selectTodoStatement *sql.Stmt
 }
 
 func (t TodoDB) SelectTodo(id int) (model.Todo, error) {
-	// Check if map contains the requested todo
-	if _, ok := t.todos[id]; !ok {
-		return model.Todo{}, errors.New("Could not find todo")
+	var (
+		description string
+		checked     bool
+	)
+	err := t.selectTodoStatement.QueryRow(id).Scan(&description, &checked)
+	if err == sql.ErrNoRows {
+		return model.Todo{}, model.CustomError{Message: "Could not find todo", StatusCode: http.StatusNotFound}
 	}
-	return t.todos[id], nil
-}
-func (t TodoDB) SelectTodos() (map[int]model.Todo, error) {
-	if len(t.todos) == 0 {
-		return nil, errors.New("No todos in database")
+	if err != nil {
+		log.Fatalf("Failed to prepare select todo by ID: %v", err)
+		return model.Todo{}, model.CustomError{Message: "Internal server error", StatusCode: http.StatusInternalServerError}
 	}
-	return t.todos, nil
-}
-func (t *TodoDB) InsertTodo(description string) model.Todo {
-	id := len(t.todos)
-	t.todos[id] = model.Todo{ID: id, Description: description, Checked: false}
-	return t.todos[id]
-}
-func (t *TodoDB) PatchTodo(id int, checked bool) (model.Todo, error) {
-	// Check if map contains the requested todo
-	if _, ok := t.todos[id]; !ok {
-		return model.Todo{}, errors.New("Could not find todo")
-	}
-	todo := t.todos[id]
-	todo.Checked = checked
-	t.todos[id] = todo
-	return todo, nil
+
+	return model.Todo{ID: id, Description: description, Checked: checked}, nil
 }
 
-func NewTodoDB() TodoDB {
-	todos := make(map[int]model.Todo)
-	return TodoDB{todos}
+func NewTodoDB(db *sql.DB) TodoDB {
+	selectTodoStatement, err := db.Prepare(`
+		SELECT description, checked 
+		FROM todos
+		WHERE id=?
+	`)
+	if err != nil {
+		log.Fatalf("Failed to prepare select todo by ID: %v", err)
+		panic(err)
+	}
+
+	return TodoDB{
+		db:                  db,
+		selectTodoStatement: selectTodoStatement,
+	}
 }

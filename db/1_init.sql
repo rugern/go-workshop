@@ -1,0 +1,12 @@
+CREATE DATABASE IF NOT EXISTS `workshop` CHARACTER SET utf8;
+FLUSH PRIVILEGES;
+
+USE workshop;
+
+CREATE TABLE IF NOT EXISTS todos (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  description VARCHAR(50),
+  checked BOOL DEFAULT FALSE
+);
+
+INSERT INTO todos (description, checked) VALUES ('Buy milk', false);
