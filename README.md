@@ -14,6 +14,11 @@ mkdir -p ~/go/src/github.com/iterate
 cd ~/go/src/github.com/iterate
 git clone git@github.com:rugern/go-workshop.git
 cd go-workshop
+
+# La Go vite eksplisitt hvor arbeidsområdet er, og eksporter binærfiler
+# (feks realize) som blir installert med 'go get'
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
 ```
 
 Installer taskrunner (gir bl.a. automatisk reloading og testing ved endringer av koden) med Go
