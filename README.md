@@ -30,7 +30,7 @@ Installer package manager med brew eller go
 ```
 brew install dep
 # eller
-go get github.com/tools/godep
+go get github.com/golang/dep
 ```
 
 Installer avhengigheter
